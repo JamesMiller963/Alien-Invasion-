@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<!--Download this game and open the file to play it-->
+<!--Current version Finished-->
+<html>
+	<head>
+		<title>The No Jumping Zone</title>
+<link rel="icon" type="image/png" href="https://daks2k3a4ib2z.cloudfront.net/602fe9be424c738336f8fb0b/60325b1b6157516f34a88574_favicon-32x32.png" sizes="32x32" />
+	</head>
+	<style>
+	    body {
+	        background-color: grey;
+	    }
+	    <style>
+	    body {
+	        background-color: grey;
+	    }
+	    #Rbutton {
+	        width: 75px;
+	        height: 50px;
+	        background-color: aqua;
+	        color: green;
+	        margin-left:575px;
+	    }
+	    #Rbutton:hover {
+	        background-color: lime;
+	    }
+	</style>
+	</style>
+	<body>
+		<p align="center">
+			<!--This draws the Canvas on the webpage -->
+			<canvas id="mycanvas"></canvas>
+		</p>
+		<button id="Rbutton">Reset</button>
+	</body>
+	<script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script>
+	<script>
+	var sketchProc = function(processingInstance) {
+      with (processingInstance) {
+        size(400, 400);
+        frameRate(60);
+var acceleration = 1;
+var deceleration = 1;
+var maxSpeed = 5;
+var jumpHeight = 0;
+var gravity = 5;
+var enemySpeed = 1;
+var enemyGravity = 0.09;
+var bounceHeight = 1.1;
+var enemyBounceHeight = 5;
+var f = createFont("Ariel Bold");
+var fSize = 20;
+var level = (1) - 1;
+var pX = 0;
+var pY = 0;
+var initialize = true;
+var x = 0;
+var y = 0;
+var xVel = 0;
+var yVel = 0;
+var canJump = false;
+var touchingBlock = false;
+var doInit = true;
+var leaders = ["James Miller - 1024", "could be you", "could be you", "could be you", "could be you", "could be you", "could be you", "could be you", "could be you"];
+var tyy = 100;
+var deaths = 0;
+var score = 1000 - deaths + round(random(0, 25));
+var scene = 1;
+var tx = 100;
+var ty = 50;
+var tx = 1000;
+var ts = 50;
+var reach = false;
+var enemies = [];
+var playerL = "p";
+var enemyL = "e";
+var blockL = "b";
+var fakeL = "f";
+var lavaL = "l";
+var spikeL = "^";
+var jumpL = "j";
+var portalL = "w";
+var waterL = "o";
+var speed = -64;
+
+
+noStroke();
+textAlign(CENTER, CENTER);
+textFont(f, fSize);
+var home = function () {
+    scene = 1;
+    background(78, 150, 79);
+    textSize(32.5);
+    fill(random(0, 255), random(0, 255), random(0, 255));
+    text("The No Jumping Zone", 200, 50);
+    fill(255, 0, 0);
+    rect(25, 250, 100, 50);
+    rect(150, 200, 100, 50);
+    rect(275, 250, 100, 50);
+    fill(0);
+    textSize(25);
+    text("Play", 200, 222.5);
+    text("How", 75, 272.5);
+    text("Leader\nBoard", 322.5, 275);
+};
+var how = function () {
+    scene = 3;
+    background(0, 255, 89);
+    fill(255, 0, 0);
+    rect(0, 0, 100, 50);
+    fill(0);
+    text("Back", 42.5, 22.5);
+    textSize(20);
+    text("Use the arrow keys to move and try to go\n to the portal. If you press the up arrow, you\n get a death. There is not much to explain.", 200, 100);
+};
+var leaderBoard = function () {
+    scene = 4;
+    background(0, 255, 255);
+    fill(255, 0, 0);
+    rect(0, 0, 100, 50);
+    fill(0);
+    text("Back", 42.5, 22.5);
+
+    text("1. "+leaders[0], 200, tyy - 40);
+    text("2. "+leaders[1], 200, tyy);
+    text("3. "+leaders[2], 200, tyy + 40);
+    text("4. "+leaders[3], 200, tyy + 80);
+    text("5. "+leaders[4], 200, tyy + 120);
+    text("6. "+leaders[5], 200, tyy + 160);
+    text("7. "+leaders[6], 200, tyy + 200);
+    text("8. "+leaders[7], 200, tyy + 240);
+    text("9. "+leaders[8], 200, tyy + 280);
+};
+var play = function () {
+    scene = 2;
+var levels = [
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b     b            b",
+    "b                  b",
+    "b                  b",
+    "b          f       b",
+    "b                  b",
+    "b                  b",
+    "b            b     b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "bfffffffffffffffflwb",
+    "b                  b",
+    "b^^^^^^^^^^^^^^^^^^b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 1
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b     o            b",
+    "b                  b",
+    "b                  b",
+    "b          o       b",
+    "b                  b",
+    "b                  b",
+    "b            o     b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "bfffffffffffffffflwb",
+    "b                  b",
+    "b^^^^^^^^^^^^^^^^^^b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 2
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp b           w   b",
+    "bb   l   l   l   l b",
+    "b   l   l   l   l  b",
+    "b    l   l   lj  l b",
+    "b   l   l   l   l  b",
+    "b    l   l   l   l b",
+    "b   l   l   l   l  b",
+    "b             j    b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b j  b        j    b",
+    "b                  b",
+    "b         b        b",
+    "b                  b",
+    "b             j    b",
+    "b                  b",
+    "bllllllllllllllllllb",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 3
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b     l   l   l    b",
+    "b     l   l   l    b",
+    "b     l   l   l    b",
+    "b     l   l   l    b",
+    "b     l   l   l    b",
+    "b   j l j l j l j  b",
+    "b    l l l l l l   b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                wwb",
+    "b                wwb",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b^^^^^^^^^^^^^^^^^^b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 4
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp   e             b",
+    "bb                 b",
+    "b                  b",
+    "b                 jb",
+    "b                  b",
+    "b j j jj  jj jj j  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "bbbbbbbbbbbbbbbbbb b",
+    "b                l b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                 lb",
+    "bww                b",
+    "bww                b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 5
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b       l l        b",
+    "b       l l        b",
+    "b       l l        b",
+    "b^^^^^^^l l^^^^^^^^b",
+    "bwwwwwwwwwwwwwwwwwwb",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 6
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "bw^^^^^^^^^^^^^^^^^b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 7
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp         b      wb",
+    "bbbbbbbbbb bbbbbbbjb",
+    "b          b       b",
+    "b bbbbbbbb b       b",
+    "b       b l        b",
+    "b       b         jb",
+    "b       b          b",
+    "bbbbbb  b          b",
+    "b       b          b",
+    "b bbbbblb         jb",
+    "b       b          b",
+    "b       b          b",
+    "bbbbbb  b          b",
+    "b       b         jb",
+    "b bbbbblb          b",
+    "b       b          b",
+    "b       b          b",
+    "b       f         jb",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 8
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b l  l  l  l  l  l b",
+    "b                  b",
+    "b      l  l  l  l  b",
+    "b l  l  l  l  l  l b",
+    "b                  b",
+    "b  l  l  l  l  l  lb",
+    "b                  b",
+    "b                  b",
+    "bbbbbbbbbbbbbbbbbbfb",
+    "bwwwwwwwwwwwwwwww  b",
+    "bwwwwwwwwwwwwwwww  b",
+    "bwwwwwwwwwwwwwwww  b",
+    "bwwwwwwwwwwwwwwww  b",
+    "bwwwwwwwwwwwwwwww  b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 9
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp        b      wlb",
+    "bb        b       jb",
+    "b         b        b",
+    "b         b        b",
+    "b     b   b        b",
+    "b     llllb       jb",
+    "b         b        b",
+    "b         b        b",
+    "b         b        b",
+    "b     b   b       jb",
+    "b     llllb        b",
+    "b         b        b",
+    "b         b        b",
+    "b         b       jb",
+    "b         b        b",
+    "b         b        b",
+    "b         b        b",
+    "b^^^^^^   f       jb",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 10
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp    l            b",
+    "bb    l            b",
+    "b     l            b",
+    "b     l            b",
+    "b  f  l            b",
+    "b    ll            b",
+    "b                  b",
+    "b                wwb",
+    "b   b  b  b  b  bwwb",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "bllllllllllllllllllb",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 11
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b l  l  l  l  l  l b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b        w         b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b^^^^^^^^^^^^^^^^^^b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 12
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b       l l        b",
+    "b       l l        b",
+    "b       l l        b",
+    "b       l l        b",
+    "blljlllllwlllllllllb",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 13
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp          l   w  b",
+    "bb          l      b",
+    "b           l      b",
+    "b           l   j  b",
+    "b           l      b",
+    "b     lllllll      b",
+    "b     l     l      b",
+    "b     l     l      b",
+    "b     l     l   j  b",
+    "b     l     l      b",
+    "b                  b",
+    "b                  b",
+    "b     l     l      b",
+    "b     l     l   j  b",
+    "b     l     l      b",
+    "b     l     l      b",
+    "b     l     l      b",
+    "b  j  l  j  l   j  b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 14
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp     l  l        b",
+    "bb     l  l        b",
+    "b      l  l        b",
+    "b         l        b",
+    "b         l        b",
+    "b         l        b",
+    "b         l        b",
+    "b         l        b",
+    "b      l  l        b",
+    "b      l  l        b",
+    "b      l  l        b",
+    "b      l  l        b",
+    "b      l  l        b",
+    "b      l  l        b",
+    "b      l  l        b",
+    "b      l  l        b",
+    "b      lwwl        b",
+    "b^^^^^^lwwl        b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 15
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b    l  l          b",
+    "b                  b",
+    "b     l  l         b",
+    "b                  b",
+    "b      l  l        b",
+    "b                  b",
+    "b       l  l       b",
+    "b                  b",
+    "b       l  l       b",
+    "b       lwwl       b",
+    "b^^^^^^^lwwl^^^^^^^b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 16
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "bll l l l l l l l lb",
+    "bllwlwlwlwlwlwlwlwlb",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 17
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp   b             b",
+    "bb   b             b",
+    "b    b             b",
+    "b    b             b",
+    "b  l               b",
+    "b  l               b",
+    "b  l               b",
+    "b  l b             b",
+    "b  l l             b",
+    "b  l l             b",
+    "b  l l   b         b",
+    "b  l l             b",
+    "b  l l       b     b",
+    "b  l l          f wb",
+    "b  l l             b",
+    "b  l l             b",
+    "b  l l             b",
+    "b^^l^l^^^^^^^^^^^^^b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 18
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp                 b",
+    "bb                 b",
+    "b                  b",
+    "b                  b",
+    "b     b            b",
+    "b                  b",
+    "b                  b",
+    "b          o       b",
+    "b                  b",
+    "b                  b",
+    "b            b     b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "bfffffffffffffffflwb",
+    "b                  b",
+    "b^^^^^^^^^^^^^^^^^^b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 19
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "bp   bl  ll        b",
+    "bb   bw            b",
+    "b    bw            b",
+    "b    bl         j  b",
+    "b     l            b",
+    "b     ljjbjbj      b",
+    "b     l     l      b",
+    "b     l     l      b",
+    "b     l     l   j  b",
+    "b     l     l      b",
+    "b                  b",
+    "b                  b",
+    "b     l     l      b",
+    "b     l     l   j  b",
+    "b     l     l      b",
+    "b     l     l      b",
+    "b     l     l      b",
+    "b  j  l  j  l   j  b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 20
+   ["bbbbbbbbbbbbbbbbbbbb",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "b                  b",
+    "bp                 b",
+    "bbbbbbbbbbbbbbbbbbbb"], // level 21 end
+
+];
+var player = function() {
+    fill(255, 195, 127);
+    rect(pX, pY, 20, 20);
+    fill(255, 0, 0);
+    rect(pX, pY + 10, 20, 10);
+    fill(255, 255, 255);
+    ellipse(pX + 5, pY + 5, 5, 5);
+    ellipse(pX + 15, pY + 5, 5, 5);
+    fill(0, 0, 0);
+    ellipse(pX + 5, pY + 5, 3, 3);
+    ellipse(pX + 15, pY + 5, 3, 3);
+};
+
+var enemy = function(x, y) {
+    this.x = x;
+    this.y = y;
+    this.dir = round(random(0, 1));
+    this.yVel = 0;
+};
+
+enemy.prototype.draw = function() {
+    fill(255, 0, 0);
+    rect(this.x, this.y, 20, 20);
+    if (this.dir === 0) {
+        this.x -= enemySpeed;
+    } else {
+        this.x += enemySpeed;
+    }
+    this.y += this.yVel;
+    this.yVel += enemyGravity;
+};
+
+var keys = [];
+
+keyPressed = function() {
+    keys[keyCode] = true;
+};
+
+keyReleased = function() {
+    keys[keyCode] = false;
+};
+
+draw = function() {
+    background(255, 255, 255);
+    yVel += 0.5;
+    canJump = false;
+    if (initialize) {
+        enemies = [];
+    }
+    if (level === 15) {
+    maxSpeed = 5.15;
+    }else {
+        maxSpeed = 5;
+    }
+    if (scene === 2 && level === 7) {
+        tx = 250;
+        ty = 200;
+    }
+    if (scene === 2 && level > 7) {
+        tx = 100;
+        ty = 50;
+    }
+    if (scene === 2 && level < 20) {
+        text("Deaths: "+deaths, tx, ty);
+    }
+    if (level === 20 && scene === 2) {
+        text("Score: "+score+"\n Press restart to play again", 200, 200);
+    }
+    canJump = false;
+for (var i = 0; i < levels[level].length; i ++) {
+    for (var j = 0; j < levels[level][i].length; j ++) {
+        switch(levels[level][i][j]) {
+            case playerL:
+                if (initialize) {
+                    pX = j * 20;
+                    pY = i * 20;
+                }
+            break;
+
+            case enemyL:
+                if (initialize) {
+                    enemies.push(new enemy(j * 20, i * 20));
+                }
+            break;
+
+            case blockL:
+                fill(0, 0, 0);
+                rect(j * 20, i * 20, 20, 20);
+                x = j * 20;
+                y = i * 20;
+                if (pX > x - 19 && pX < x + 19 && pY > y - 21 && pY < y - 5) {
+                    yVel = 0;
+                    if (pY > y - 20) {
+                        pY = y - 20;
+                        yVel = 0;
+                    }
+                }
+                if (pX > x - 19 && pX < x + 19 && pY < y + 20 && pY > y + 5) {
+                    yVel = -yVel/4;
+                    pY += 2;
+                }
+                if (pX > x - 20 && pX < x - 9 && pY > y - 17 && pY < y + 17) {
+                    xVel = 0;
+                    touchingBlock = true;
+                    if (pX > x - 20) {
+                        pX = x - 20;
+                        xVel = 0;
+                    }
+                }
+                if (pX < x + 20 && pX > x + 9 && pY > y - 17 && pY < y + 17) {
+                    xVel = 0;
+                    touchingBlock = true;
+                    if (pX < x + 20) {
+                        pX = x + 20;
+                        xVel = 0;
+                    }
+                }
+                for (var l = 0; l < enemies.length; l ++) {
+                    if (enemies[l].x > x - 19 && enemies[l].x < x + 19 && enemies[l].y > y - 21 && enemies[l].y < y - 5) {
+                    enemies[l].yVel = 0;
+                    if (enemies[l].y > y - 20) {
+                        enemies[l].y = y - 20;
+                        enemies[l].yVel = 0;
+                    }
+                }
+                    if (enemies[l].x > x - 19 && enemies[l].x < x + 19 && enemies[l].y < y + 20 && enemies[l].y > y + 5) {
+                    enemies[l].yVel = -enemies[l].yVel/4;
+                    enemies[l].y += 2;
+                }
+                    if (enemies[l].x > x - 20 && enemies[l].x < x - 9 && enemies[l].y > y - 17 && enemies[l].y < y + 17) {
+                    enemies[l].dir = 0;
+                }
+                    if (enemies[l].x < x + 20 && enemies[l].x > x + 9 && enemies[l].y > y - 17 && enemies[l].y < y + 17) {
+                    enemies[l].dir = 1;
+                }
+                }
+            break;
+
+            case fakeL:
+                fill(41, 41, 41);
+                rect(j * 20, i * 20, 20, 20);
+            break;
+
+            case lavaL:
+                fill(255, 132, 0);
+                rect(j * 20, i * 20, 20, 20);
+                x = j * 20;
+                y = i * 20;
+                if (pX > x - 20 && pX < x + 20 && pY > y - 20 && pY < y + 20) {
+                    initialize = true;
+                    doInit = false;
+                    deaths++;
+                }
+                for (var l = 0; l < enemies.length; l ++) {
+                    if (enemies[l].x > x - 19 && enemies[l].x < x + 19 && enemies[l].y > y - 21 && enemies[l].y < y - 5) {
+                    enemies[l].yVel = 0;
+                    if (enemies[l].y > y - 20) {
+                        enemies[l].y = y - 20;
+                        enemies[l].yVel = 0;
+                    }
+                }
+                    if (enemies[l].x > x - 19 && enemies[l].x < x + 19 && enemies[l].y < y + 20 && enemies[l].y > y + 5) {
+                    enemies[l].yVel = -enemies[l].yVel/4;
+                    enemies[l].y += 2;
+                }
+                    if (enemies[l].x > x - 20 && enemies[l].x < x - 9 && enemies[l].y > y - 17 && enemies[l].y < y + 17) {
+                    enemies[l].dir = 0;
+                }
+                    if (enemies[l].x < x + 20 && enemies[l].x > x + 9 && enemies[l].y > y - 17 && enemies[l].y < y + 17) {
+                    enemies[l].dir = 1;
+                }
+                }
+            break;
+
+            case spikeL:
+                fill(255, 0, 0);
+                triangle(j * 20 + 10, i * 20, j * 20, i * 20 + 20, j * 20 + 20, i * 20 + 20);
+                x = j * 20;
+                y = i * 20;
+                if (pX > x - 20 && pX < x + 20 && pY > y - 20 && pY < y + 20) {
+                    initialize = true;
+                    doInit = false;
+                    deaths++;
+                }
+                for (var l = 0; l < enemies.length; l ++) {
+                    if (enemies[l].x > x - 19 && enemies[l].x < x + 19 && enemies[l].y > y - 21 && enemies[l].y < y - 5) {
+                    enemies[l].yVel = 0;
+                    if (enemies[l].y > y - 20) {
+                        enemies[l].y = y - 20;
+                        enemies[l].yVel = 0;
+                    }
+                }
+                    if (enemies[l].x > x - 19 && enemies[l].x < x + 19 && enemies[l].y < y + 20 && enemies[l].y > y + 5) {
+                    enemies[l].yVel = -enemies[l].yVel/4;
+                    enemies[l].y += 2;
+                }
+                    if (enemies[l].x > x - 20 && enemies[l].x < x - 9 && enemies[l].y > y - 17 && enemies[l].y < y + 17) {
+                    enemies[l].dir = 0;
+                }
+                    if (enemies[l].x < x + 20 && enemies[l].x > x + 9 && enemies[l].y > y - 17 && enemies[l].y < y + 17) {
+                    enemies[l].dir = 1;
+                }
+                }
+            break;
+
+            case waterL:
+                fill(0, 136, 255, 155);
+                rect(j * 20, i * 20, 20, 20);
+                x = j * 20;
+                y = i * 20;
+                if (pX > x - 20 && pX < x + 20 && pY > y - 20 && pY < y + 20) {
+                    yVel = 0.5;
+                }
+                for (var l = 0; l < enemies.length; l ++) {
+                    if (enemies[l].x > x - 20 && enemies[l].x < x + 20 && enemies[l].y > y - 20 && enemies[l].y < y + 20) {
+                    enemies[l].yVel = 0.5;
+                    }
+                }
+            break;
+
+            case jumpL:
+                fill(209, 0, 209);
+                rect(j * 20, i * 20, 20, 20);
+                x = j * 20;
+                y = i * 20;
+                if (pX > x - 20 && pX < x + 20 && pY > y - 20 && pY < y + 20) {
+                    yVel = -11;
+                    pY -= 1;
+                }
+                for (var l = 0; l < enemies.length; l ++) {
+                    if (enemies[l].x > x - 20 && enemies[l].x < x + 20 && enemies[l].y > y - 20 && enemies[l].y < y + 20) {
+                    enemies[l].yVel = -enemyBounceHeight;
+                    enemies[l].y -= 1;
+                }
+                }
+            break;
+
+            case portalL:
+                fill(random(255), random(255), random(255));
+                rect(j * 20, i * 20, 20, 20);
+                x = j * 20;
+                y = i * 20;
+                if (pX > x - 20 && pX < x + 20 && pY > y - 20 && pY < y + 20) {
+                    level ++;
+                    initialize = true;
+                    doInit = false;
+                }
+                for (var l = 0; l < enemies.length; l ++) {
+                    if (enemies[l].x > x - 19 && enemies[l].x < x + 19 && enemies[l].y > y - 21 && enemies[l].y < y - 5) {
+                    enemies[l].yVel = 0;
+                    if (enemies[l].y > y - 20) {
+                        enemies[l].y = y - 20;
+                        enemies[l].yVel = 0;
+                    }
+                }
+                    if (enemies[l].x > x - 19 && enemies[l].x < x + 19 && enemies[l].y < y + 20 && enemies[l].y > y + 5) {
+                    enemies[l].yVel = -enemies[l].yVel/4;
+                    enemies[l].y += 2;
+                }
+                    if (enemies[l].x > x - 20 && enemies[l].x < x - 9 && enemies[l].y > y - 17 && enemies[l].y < y + 17) {
+                    enemies[l].dir = 0;
+                }
+                    if (enemies[l].x < x + 20 && enemies[l].x > x + 9 && enemies[l].y > y - 17 && enemies[l].y < y + 17) {
+                    enemies[l].dir = 1;
+                }
+                }
+            break;
+        }
+
+    }
+}
+if (initialize) {
+    xVel = 0;
+    yVel = 0;
+}
+if (doInit) {
+initialize = false;
+}
+doInit = true;
+pY += yVel;
+pX += xVel;
+player();
+if (keys[RIGHT]) {
+    if (xVel < -3) {
+        xVel = -3;
+    }
+    if (xVel < maxSpeed) {
+    xVel += acceleration;
+    } else {
+        xVel = maxSpeed;
+    }
+
+} else if (xVel > 0.05) {
+    xVel  -= deceleration;
+
+} else if (keys[LEFT]) {
+    if (xVel > 3) {
+        xVel = 3;
+    }
+    if (xVel > -maxSpeed) {
+    xVel -= acceleration;
+    } else {
+        xVel = -maxSpeed;
+    }
+    if (touchingBlock) {
+        pX -= 0.1;
+}
+
+} else if (xVel < -0.05) {
+    xVel += deceleration;
+
+} else {
+    xVel = 0;
+}
+if (keys[UP]) {
+    deaths++;
+}
+if (keys[UP] && canJump) {
+    yVel = -jumpHeight;
+    pY -= gravity;
+    canJump = false;
+    deaths++;
+}
+for (var i = 0; i < enemies.length; i ++) {
+    enemies[i].draw();
+    if (pX > enemies[i].x - 20 && pX < enemies[i].x + 20 && pY > enemies[i].y - 20 && pY < enemies[i].y + 20) {
+        initialize = true;
+        deaths++;
+    }
+    if (enemies[i].x < 1) {
+        enemies[i].dir = 1;
+    }
+    if (enemies[i].x > width - 21) {
+        enemies[i].dir = 0;
+    }
+}
+if (pY > height) {
+    initialize = true;
+}
+};
+};
+draw = function() {
+    if (scene === 1) {
+    home();
+    }
+};
+mouseClicked = function () {
+    if (scene === 1 && mouseX >= 150 && mouseX <= 250 && mouseY >= 200 && mouseY <= 250 && play) {
+        play();
+    }else if (scene === 1 && mouseX >= 25 && mouseX <= 125 && mouseY >= 250 && mouseY <= 300) {
+        how();
+    }else if (scene === 1 && mouseX >= 275 && mouseX <= 375 && mouseY >= 250 && mouseY <= 300) {
+        leaderBoard();
+    }
+    if (scene === 3 || scene === 4) {
+        if (mouseX <= 100 && mouseY <= 50) {
+            home();
+        }
+    }
+};
+};
+};
+var canvas = document.getElementById("mycanvas");
+    var processingInstance = new Processing(canvas, sketchProc);
+	document.getElementById("Rbutton").onclick = function () {
+       window.location.reload();
+    };
+	</script>
+</html>

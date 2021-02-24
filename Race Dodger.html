@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<!--Download this game and open the file to play it-->
+<!--Current version Finished-->
+<html>
+	<head>
+		<title>Race Dodger</title>
+<link rel="icon" type="image/png" href="https://daks2k3a4ib2z.cloudfront.net/602fe9be424c738336f8fb0b/60325b1b6157516f34a88574_favicon-32x32.png" sizes="32x32" />
+	</head>
+	<style>
+	    body {
+	        background-color: grey;
+	    }
+	    <style>
+	    body {
+	        background-color: grey;
+	    }
+	    #Rbutton {
+	        width: 75px;
+	        height: 50px;
+	        background-color: aqua;
+	        color: green;
+	        margin-left:575px;
+	    }
+	    #Rbutton:hover {
+	        background-color: lime;
+	    }
+	</style>
+	</style>
+	<body>
+		<p align="center">
+			<!--This draws the Canvas on the webpage -->
+			<canvas id="mycanvas"></canvas>
+		</p>
+		<button id="Rbutton">Reset</button>
+	</body>
+	<script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script>
+	<script>
+	var sketchProc = function(processingInstance) {
+      with (processingInstance) {
+        size(600, 600);
+        frameRate(60);
+/*** Globals ***/
+//{
+var loadGoogleFont = (function () {
+    return this.Function ( "gfName", "gfName = gfName.replace ( /\\s+/g, '+' );var subsets = Array.prototype.slice.call ( arguments, 1, arguments.length - 1 ), url = 'https://fonts.googleapis.com/css?family=' + gfName + ( subsets.length > 0 ? '&amp;subset=' + subsets : '' ), callback = arguments [ arguments.length - 1 ], gfs = document.querySelectorAll('link[href=\"'+url+'\"]');if(!gfs.length){var f=document.createElement('link');f.setAttribute('rel','stylesheet');f.setAttribute('type','text/css');f.onload=callback;f.setAttribute('href',url);document.head.appendChild(f);}else if ( typeof callback === 'function' ) { callback.call ( gfs [ 0 ] ); }");
+})();
+var fontloaded = false;
+smooth();
+textAlign(CENTER,CENTER);
+var page = 'main';
+var tim = 10;
+var iStem = {x: -210, y: 350};
+var iDot = {x: 0, y: -245};
+var aPart = {x: 275, y: 275};
+var logoTimer = 0;
+var logoSpeed = 10;
+var x = 623;
+var x2 = -195;
+var clicked = false;
+var keys = [];
+
+var minutes = 0;
+var seconds = 20;
+
+var speed = 0;
+var tfade = 0;
+var timey = 0;
+var textY = 687;
+var level = 1;
+var far = 255;
+var farTim = 0;
+var aFade = 255;
+var far2 = 255;
+var farTim2 = 0;
+var far3 = 255;
+var farTim3 = 0;
+var far4 = 255;
+var farTim4 = 0;
+var far5 = 255;
+var farTim5 = 0;
+var tim4 = 0;
+var tim5 = 0;
+var tim6 = 0;
+var tim7 = 0;
+var tim8 = 0;
+//}
+
+
+
+
+/*** Player Functions ***/
+var p = {
+  x:270,
+  y:545,
+  w:50,
+  h:50,
+  speed:4,
+  deathW:0,
+  clr:color(255, 0, 0),
+
+
+
+};
+
+
+/*** Transition ***/
+var ellipso = function(x,y,s){
+    noStroke();
+pushMatrix();
+    translate(x-s*140, y-s*190);
+    scale(s);
+
+    fill(0, 0, 0);
+    ellipse(139, 188, 67, 60);
+
+
+};
+var Transition = function(){
+    this.on = false;
+    this.transTo = undefined;
+    this.size = 0;
+    this.vel = 0.2;
+
+    this.start = function(whereTo){
+        this.on = true;
+        this.transTo = whereTo;
+    };
+    this.display = function(){
+        pushMatrix();
+        translate(width/2, height/2);
+        rotate(this.size*10);
+        ellipso(0, 0, this.size);
+        popMatrix();
+    };
+    this.update = function(){
+        if(this.on){
+            this.size+=this.vel;
+
+            if(this.size > 18){
+                this.vel *= -1;
+                page = this.transTo;
+            }else if(this.size <= 0){
+                this.on = false;
+                this.size = 0;
+                this.vel *= -1;
+            }
+
+        }
+    };
+    this.run = function(){
+        this.update();
+        if(this.on){
+            this.display();
+        }
+    };
+};
+
+var trans = new Transition();
+
+/*** Particles ***/
+var Particle = function(x,y,clr,life) {
+    this.x = random(x);
+    this.y = y;
+    this.vx = random(-1, 1);
+    this.vy = random(-1);
+    this.life = life;
+    this.r = random(0.5, 2.5);
+    this.clr = clr;
+
+
+
+};
+Particle.prototype.draw = function() {
+    noStroke();
+        fill(this.clr,this.life);
+        ellipse(this.x, this.y, this.r * 3, this.r * 3);
+};
+Particle.prototype.update = function(){
+this.x += this.vx;
+        this.y += this.vy;
+        this.life--;
+};
+var particles = [];
+
+/*** Buttons ***/
+var Button = function(x, y, width, height, text, page, size){
+    this.x = x;
+    this.y = y;
+    this.w = width;
+    this.h = height;
+    this.text = text;
+    this.nxt = page;
+    this.size = size;
+    this.r = 0;
+
+};
+Button.prototype.draw = function() {
+
+    pushStyle();
+
+   rectMode(CENTER);
+
+   if(mouseX > this.x - this.w/2 && mouseX<this.x+this.w/2 && mouseY>this.y-this.h/2 && mouseY< this.y+this.h/2){
+
+
+
+    stroke(255);
+    strokeWeight(1);
+    fill(128,128,128);
+   rect(this.x, this.y+13, this.w, this.h);
+    fill(255, 255, 255);
+    textSize(this.size);
+    text(this.text,this.x,this.y+16);
+
+
+
+
+
+
+
+
+
+
+        cursor(HAND);
+        if(clicked){
+          trans.start(this.nxt);
+        }
+   } else {
+
+
+stroke(255);
+strokeWeight(1);
+   fill(77,77,77);
+    rect(this.x, this.y+13, this.w, this.h);
+     fill(105, 105, 105);
+    rect(this.x, this.y, this.w, this.h);
+    fill(255, 255, 255);
+    textSize(this.size);
+    text(this.text,this.x,this.y);
+
+
+
+
+
+
+
+
+
+   }
+
+
+
+   popStyle();
+};
+var playButton = new Button(160,309,120,120,"Race!","play",30);
+var howButton = new Button(291,309,120,120,"Help?","how",30);
+var powerButton = new Button(426,309,120,120,"Powerups","power",20);
+var backButton = new Button(295,530,90,90,"Back","main",20);
+var pButton = new Button(59,70,50,50,"|  |","pause",20);
+var back2Button = new Button(295,440,90,90,"Back to\ngame","play",15);
+/*** Logo ***/
+
+
+
+var W = 87;
+var A = 65;
+var S = 83;
+var D = 68;
+/*** Player ***/
+var Player = function(){
+
+     noStroke();
+   fill(255, 0, 0);
+   rect(p.x,p.y,p.w,p.h);
+
+   fill(0);
+   ellipse(p.x+15,p.y+8,p.w-43,p.h-43);
+   ellipse(p.x+35,p.y+8,p.w-43,p.h-43);
+
+
+
+   if(keys[RIGHT]){
+       p.x += p.speed;
+
+   } else {
+
+
+   }
+
+
+    if(keys[LEFT]){
+       p.x -= p.speed;
+
+
+   }
+
+   if(keys[DOWN]){
+       p.y += p.speed;
+   }
+
+   if(keys[UP]){
+       p.y -= p.speed;
+   }
+
+
+   if(keys[W]){
+       p.y -= p.speed;
+   }
+
+    if(keys[A]){
+       p.x -= p.speed;
+   }
+
+    if(keys[S]){
+       p.y += p.speed;
+   }
+
+   if(keys[D]){
+       p.x += 5;
+   }
+
+   if(p.y>=550){
+       p.y = 550;
+   }
+   p.x = constrain(p.x,0,550);
+
+
+};
+var resetPlayer = function(){
+  p.x = 270;
+  p.y = 545;
+  seconds = 20;
+
+  if(level===12){
+      minutes = 1;
+      seconds = 59;
+  }
+
+};
+
+/*** For menu and how and play stuff ***/
+var lvl5s = 0;
+var lvl5x = 0;
+var lvl12s = 0;
+var lvl12x = 0;
+var cirClr = 0;
+var circle = function(x,y){
+
+        noFill();
+        strokeWeight(5);
+        stroke(cirClr);
+        ellipse(x,y+40,70,70);
+        pushMatrix();
+
+        translate(x,y+40);
+        rotate(speed);
+        translate(-x,-y-40);
+        translate(0,40);
+        line(x,y-70/2,x,y+70/2);
+         for(var i = 0; i< 20;i++){
+            translate(x,y);
+            rotate(18);
+            translate(-x,-y);
+            noStroke();
+            fill(cirClr);
+            triangle(x,y+70/1.1,x-2,y+70/2,x+2,y+70/1.6);
+
+         }
+            popMatrix();
+       speed += 1;
+
+      if(dist(x,y,p.x,p.y)<85){
+       resetPlayer();
+   }
+
+   if(level===11){
+
+   }
+
+
+
+
+};
+var arrows = function(x,y,size){
+    pushMatrix();
+  fill(0);
+  textSize(size);
+  text("\u2190",x,y);
+  text("\u2191",x+21,y-21);
+  text("\u2192",x+48,y);
+  text("\u2193",x+20,y+25);
+  popMatrix();
+};
+var txt = function(txt,x,y,size){
+    textSize(size);
+    fill(0);
+    for(var i = 0; i < 360; i +=20){
+        text(txt,x+cos(i)*size/13,y+sin(i)*size/13);
+    }
+    fill(255);
+    text(txt,x,y);
+};
+var r = 0;
+var cutter = function(x,y){
+
+    noStroke();
+    pushMatrix();
+     translate(x,y);
+    rotate(r);
+
+    for(var i = 0; i < 2; i++){
+        pushMatrix();
+        rotate(i*176);
+         fill(255, 0, 0);
+       rect(10,-3,100,10);
+       popMatrix();
+    }
+
+  r -= 5;
+   fill(255, 0, 0);
+      rect(-28,-25,50,50);
+   popMatrix();
+
+   fill(0,25);
+   ellipse(x,y,200,200);
+
+
+
+   if(dist(p.x,p.y,x,y)<120){
+       resetPlayer();
+   }
+
+   if(level===8){
+       noStroke();
+    pushMatrix();
+     translate(x,y);
+    rotate(r);
+    scale(1.5);
+
+    for(var i = 0; i < 2; i++){
+        pushMatrix();
+        rotate(i*176);
+         fill(255, 0, 0);
+       rect(10,-3,100,10);
+       popMatrix();
+    }
+
+  r -= 10;
+   fill(255, 0, 0);
+      rect(-28,-25,50,50);
+   popMatrix();
+
+   fill(0,25);
+   ellipse(x,y,330,330);
+
+
+
+   if(dist(p.x,p.y,x,y)<170){
+       resetPlayer();
+   }
+   }
+
+
+
+
+
+
+
+
+
+
+
+};
+var l2 =0;
+var lcolor = color(255, 0, 0);
+var laser = function(x, y, w, h) {
+    l2+=(5 / this.__frameRate);
+
+    if(l2>=10){
+
+    fill(lcolor);
+    rect(x, y, w, h);
+    fill(lcolor,7);
+    for(var i = 0; i < 360; i += 20){
+        rect(x + sin(i) * 3, y + cos(i)*3, w, h);
+        rect(x + sin(i) * 8, y  + cos(i) * 8, w, h);
+    }
+
+      if(p.x + p.w > x && p.x < x + w && p.y + p.h > y + 1 && p.y < y + h) {
+
+
+        resetPlayer();
+    }
+
+
+    }
+
+    if(l2>=15){
+           fill(255,0,0);
+      rect(x, y, w, h);
+
+
+
+    }
+
+    if(l2>=20){
+        l2 = 0;
+    }
+
+    if(level===9){
+         l2-=(3 / this.__frameRate);
+    }
+
+
+    if(level===10||level===12){
+        l2-=(4 / this.__frameRate);
+    }
+
+    if(level===11){
+        l2-=(4 / this.__frameRate);
+    }
+
+
+
+};
+var eSpeed = 0;
+var Bot = function(ey){
+  this.x = 0;
+  this.y = ey;
+  this.w = 45;
+  this.h = 45;
+  this.clr = color(255, 0, 0);
+  this.speed = eSpeed;
+
+};
+Bot.prototype.draw = function() {
+     fill(this.clr);
+
+
+     rect(this.x,this.y,this.w,this.h);
+
+
+
+
+     if(this.x<=0){
+       this.speed= 5;
+    }
+
+    if(this.x>=560){
+       this.speed = -5;
+    }
+
+
+    this.x = this.x + this.speed;
+
+    if(level===4){
+        if(keys[32]){
+            this.speed = 0;
+        } else {
+
+     if(this.speed>=0){
+       this.speed= 5;
+    }
+
+    if(this.x>=560){
+       this.speed = -5;
+    }
+        }
+    }
+
+    if(level===7){
+        if(keys[32]){
+            this.speed = 0;
+        }
+
+    }
+
+    if(level===10||level===12){
+
+    if(keys[32]){
+        this.clr = color(255,0,0,100);
+     if(p.x + p.w > this.x && p.x < this.x + this.w && p.y + p.h > this.y + 1 && p.y < this.y + this.h){
+
+       }
+    } else {
+         this.clr = color(255,0,0);
+         if(p.x + p.w > this.x && p.x < this.x + this.w && p.y + p.h > this.y + 1 && p.y < this.y + this.h){
+           resetPlayer();
+
+       }
+    }
+
+    } else {
+        if(p.x + p.w > this.x && p.x < this.x + this.w && p.y + p.h > this.y + 1 && p.y < this.y + this.h){
+           resetPlayer();
+
+       }
+    }
+};
+var pounderF = 0;
+var Pounders = function(y){
+   this.x = 0;
+   this.y = y;
+   this.speed = pounderF;
+   this.speed2 = pounderF;
+   this.x2 = 0;
+   this.timer = 0;
+   this.timer2 = 0;
+   this.clr = color(40);
+
+};
+Pounders.prototype.draw = function() {
+    fill(this.clr);
+    stroke(255, 255, 255);
+    rect(600,this.y,this.x2,100);
+    rect(0,this.y,this.x,100);
+
+    this.timer++;
+    this.timer2++;
+    if(this.x<=0){
+            this.speed = 15;
+      }
+
+        if(this.x>=300){
+            this.x = 300;
+        }
+
+
+
+        if(this.timer>=150){
+           this.speed = -5;
+        }
+
+        if(this.x<=0){
+            this.timer = 0;
+        }
+
+
+
+        if(this.x2<=100){
+            this.speed2 = -15;
+        }
+
+        if(this.x2<=-300){
+            this.x2 =-300;
+        }
+        if(this.timer>=150){
+           this.speed2 = 5;
+        }
+
+        if(this.x2<=600){
+            this.timer2 = 0;
+        }
+
+
+
+
+  if(level===7){
+        if(keys[32]){
+            this.speed = 0;
+            this.speed2 = 0;
+        }
+    }
+
+    if(level===8){
+        if(this.x<=0){
+            this.speed = 5;
+      }
+
+        if(this.x>=300){
+            this.x = 300;
+        }
+
+
+
+        if(this.timer>=150){
+           this.speed = -5;
+        }
+
+        if(this.x<=0){
+            this.timer = 0;
+        }
+
+
+
+        if(this.x2<=100){
+            this.speed2 = -5;
+        }
+
+        if(this.x2<=-300){
+            this.x2 =-300;
+        }
+        if(this.timer>=150){
+           this.speed2 = 5;
+        }
+
+        if(this.x2<=600){
+            this.timer2 = 0;
+        }
+    }
+
+    if(level===10||level===12){
+        if(keys[32]){
+            this.clr = color(40,100);
+            if(p.x + p.w > 0 && p.x < 0 + this.x && p.y + p.h > this.y + 1 && p.y < this.y + 100){
+
+       }
+
+       if(p.x + p.w < 650 && p.x >650 + this.x2 && p.y + p.h > this.y + 1 && p.y < this.y + 100){
+
+       }
+        } else {
+            this.clr = color(40);
+            if(p.x + p.w > 0 && p.x < 0 + this.x && p.y + p.h > this.y + 1 && p.y < this.y + 100){
+           resetPlayer();
+       }
+
+       if(p.x + p.w < 650 && p.x >650 + this.x2 && p.y + p.h > this.y + 1 && p.y < this.y + 100){
+           resetPlayer();
+       }
+    }
+    } else {
+        this.clr = color(40);
+            if(p.x + p.w > 0 && p.x < 0 + this.x && p.y + p.h > this.y + 1 && p.y < this.y + 100){
+           resetPlayer();
+       }
+
+       if(p.x + p.w >650 && p.x >650 + this.x2 && p.y + p.h > this.y&& p.y < this.y + 100){
+           resetPlayer();
+       }
+    }
+
+
+    this.x = this.x + this.speed;
+    this.x2 = this.x2 + this.speed2;
+
+
+
+
+};
+//pounders
+//{
+var pound = new Pounders(227);
+var pound2 = new Pounders(200);
+var pound3 = new Pounders(400);
+var pound4 = new Pounders(100);
+
+//}
+//bots
+//{
+var bot = new Bot(400);
+var bot2 = new Bot(100);
+var bot3 = new Bot(200);
+var bot4 = new Bot(300);
+var bot5 = new Bot(400);
+var bot6 = new Bot(100);
+var bot7 = new Bot(500);
+var bot8 = new Bot(200);
+var bot9 = new Bot(100);
+var bot10 = new Bot(200);
+var bot11 = new Bot(300);
+var bot12 = new Bot(400);
+var bot14 = new Bot(100);
+var bot13 = new Bot(271);
+var bot15 = new Bot(134);
+var bot16 = new Bot(356);
+var bot17 = new Bot(220);
+var bot18 = new Bot(399);
+var bot19 = new Bot(319);
+var bot20 = new Bot(370);
+var bot21 = new Bot(477);
+var bot22 = new Bot(160);
+var bot23 = new Bot(284);
+
+
+//}
+
+
+
+draw = function(){
+    cursor();
+    if(!fontloaded){
+        loadGoogleFont('Faster One|Quicksand');
+    }
+    if(page==="main"){
+
+         noStroke();
+         for(var i = 0; i < width+5; i += 5){
+            strokeWeight(5);
+            stroke(lerpColor(
+                color(0, 196, 255),
+                color(0, 255, 170),
+                i/height));
+            line(i, 0, i, height);
+        }
+        pushMatrix();
+                    translate(0, -127);
+                    noStroke();
+                    rotate(12);
+                    fill(0, 0, 0,10);
+                    rect(0, 150, width * 1.2, 30);
+                    rect(0, 200, width * 1.2, 100);
+                    rect(0, 230, width * 1.2, 40);
+                    rect(0, 360, width * 1.2, 30);
+                    rect(0, 520, width * 1.2, 80);
+                    rect(0, 540, width, 20);
+                    popMatrix();
+textFont(createFont("Quicksand"));
+playButton.draw();
+howButton.draw();
+powerButton.draw();
+fill(0,0,0,tfade);
+timey++;
+
+  textFont(createFont("Faster One"));
+  fill(0);
+  textSize(80);
+  text("Race\nDodger",291,textY);
+if(timey>=50){
+  textY = lerp(textY,104,0.08);
+}
+
+if(timey>=120){
+    tfade+=5;
+}
+rotate(-10);
+textFont(createFont("Quicksand"));
+fill(0);
+popMatrix();
+}
+
+    if(page==="how"){
+        textFont(createFont("Quicksand"));
+         for(var i = 0; i < width+5; i += 5){
+            strokeWeight(5);
+            stroke(lerpColor(
+                color(0, 196, 255),
+                color(0, 255, 170),
+                i/height));
+            line(i, 0, i, height);
+        }
+
+                    pushMatrix();
+                    translate(0, -127);
+                    noStroke();
+                    rotate(12);
+                    fill(0, 0, 0,10);
+                    rect(0, 150, width * 1.2, 30);
+                    rect(0, 200, width * 1.2, 100);
+                    rect(0, 230, width * 1.2, 40);
+                    rect(0, 360, width * 1.2, 30);
+                    rect(0, 520, width * 1.2, 80);
+                    rect(0, 540, width, 20);
+                    popMatrix();
+                    arrows(241,112,20);
+                    fill(0);
+                    textSize(35);
+                    text("Use           to move.\nThe point of the game is to dodge\nevery thing you see as fast has\ncan. If you get a powerup, press\nspacebar to use it.\nGet to the end before the time\nruns out. If the time runs out,\nyou lose and start over.", 304,269);
+                    backButton.draw();
+
+    }
+
+    if(page==="power"){
+        textFont(createFont("Quicksand"));
+         for(var i = 0; i < width+5; i += 5){
+            strokeWeight(5);
+            stroke(lerpColor(
+                color(0, 196, 255),
+                color(0, 255, 170),
+                i/height));
+            line(i, 0, i, height);
+        }
+
+                    pushMatrix();
+                    translate(0, -127);
+                    noStroke();
+                    rotate(12);
+                    fill(0, 0, 0,10);
+                    rect(0, 150, width * 1.2, 30);
+                    rect(0, 200, width * 1.2, 100);
+                    rect(0, 230, width * 1.2, 40);
+                    rect(0, 360, width * 1.2, 30);
+                    rect(0, 520, width * 1.2, 80);
+                    rect(0, 540, width, 20);
+                    popMatrix();
+
+                    fill(0);
+                    textSize(20);
+                    text("Powerup 1\nSlow Motion\n\nYou can slow down all the \nobstatcles.",130,100);
+
+                    fill(0);
+                    textSize(20);
+                    text("Powerup 2\nTime Stopper\n\nStop all the obstacles\nfrom moving and also stop\nthe time.",460,105);
+
+                    fill(0);
+                    textSize(30);
+                    text("Powerup 3\nShut Down\n\nYou can walk straight\nthrough things without \ngetting hurt!",290,300);
+
+                    backButton.draw();
+
+    }
+
+    if(page==="play"){
+        var Seconds = floor(seconds);
+         textFont(createFont("Quicksand"));
+
+        //{
+   background(64, 235, 72);
+        Player();
+        fill(0);
+        textSize(50);
+        text("Level: "+level,300,70);
+        fill(0);
+
+ if(p.y <= 0){
+       level++;
+               resetPlayer();
+
+     seconds-= (1 / this.__frameRate);
+
+}
+
+
+seconds-= (1 / this.__frameRate);
+
+
+
+if (seconds >= 60) {
+minutes ++;
+seconds = 0;
+}
+
+if(minutes<=0&&seconds<=0){
+
+     resetPlayer();
+       fill(0,aFade);
+            textSize(50);
+        text("Times UP!",318,249);
+
+        aFade-=2;
+
+
+
+}
+
+if(minutes<=0&&seconds<=10){
+text(minutes+":"+"0"+Seconds, 556, 60);
+} else {
+    text(minutes+":"+Seconds, 556, 60);
+}
+
+//}
+        //{
+           pushMatrix();
+                    translate(0, -127);
+                    noStroke();
+                    rotate(12);
+                    fill(0, 0, 0,10);
+                    rect(0, 150, width * 1.2, 30);
+                    rect(0, 200, width * 1.2, 100);
+                    rect(0, 230, width * 1.2, 40);
+                    rect(0, 360, width * 1.2, 30);
+                    rect(0, 520, width * 1.2, 80);
+                    rect(0, 540, width, 20);
+                    popMatrix();
+
+                    //}
+
+
+        if(level===1){
+
+            cutter(346,203);
+            cutter(86,342);
+            cutter(516,342);
+
+            fill(0,far);
+            textSize(50);
+            text("Powerup Unlocked!",318,249);
+            textSize(30);
+            text("Slow Motion",318,299);
+
+            farTim++;
+
+            if(farTim>=100){
+                far-=2;
+            }
+
+            if(keys[32]){
+                r += 12;
+            }
+
+
+
+
+
+
+
+        }
+
+       if(level===2){
+          circle(100,288,2);
+          circle(200,288,2);
+          circle(300,288,2);
+          circle(400,288,2);
+          circle(500,288,2);
+       }
+
+       if(level===3){
+            laser(-17,129,794,10);
+             cutter(296,259);
+             circle(100,288,2);
+             circle(500,288,2);
+            bot.draw();
+
+
+
+
+
+       }
+
+        if(level===4){
+       tim4++;
+
+       if(tim4>=50){
+           bot2.draw();
+       }
+       if(tim4>=100){
+           bot3.draw();
+       }
+       if(tim4>=150){
+           bot4.draw();
+       }
+       if(tim4>=200){
+           bot5.draw();
+       }
+
+
+
+
+
+           fill(0,far2);
+            textSize(50);
+            text("Powerup Unlocked!",318,249);
+            textSize(30);
+            text("Time Stopper",318,299);
+
+            farTim2++;
+
+            if(farTim2>=100){
+                far2-=2;
+            }
+
+            if(keys[32]){
+                seconds+= (1 / this.__frameRate);
+
+
+
+            }
+        }
+
+        if(level===5){
+            pound.draw();
+
+        if(lvl5x<=0){
+            lvl5s = 7;
+        }
+
+        if(lvl5x>=500){
+            lvl5s = -7;
+        }
+            circle(lvl5x,405,2);
+
+
+
+            lvl5x += lvl5s;
+
+
+        }
+
+        if(level===6){
+            laser(-17,101,794,10);
+            tim5++;
+
+       if(tim5>=50){
+           pound2.draw();
+       }
+       if(tim5>=100){
+           pound3.draw();
+       }
+
+        }
+
+        if(level===7){
+             pound2.draw();
+
+             fill(0,far4);
+            textSize(50);
+            text("Powerup Unlocked Again!",318,249);
+            textSize(30);
+            text("Time Stopper",318,299);
+
+            farTim4++;
+
+            if(farTim4>=100){
+                far4-=2;
+            }
+
+             if(lvl5x<=0){
+            lvl5s = 7;
+        }
+             if(lvl5x>=500){
+            lvl5s = -7;
+        }
+
+            circle(lvl5x,324,2);
+
+
+
+            lvl5x += lvl5s;
+
+
+            if(keys[32]){
+                lvl5s = 0;
+            }
+
+                tim6++;
+
+       if(tim6>=50){
+           bot6.draw();
+       }
+       if(tim6>=100){
+           bot7.draw();
+       }
+
+
+        }
+
+        if(level===8){
+            cutter(293,302);
+
+        }
+
+        if(level===9){
+            for(var i = 0; i < 10; i++){
+            laser(-17,i*120,794,10);
+
+            }
+        }
+
+        if(level===10){
+            tim7++;
+              for(var i = 0; i < 10; i++){
+            laser(-17,i*120,794,10);
+
+            }
+
+            bot8.draw();
+            bot.draw();
+
+       if(tim7>=200){
+           bot9.draw();
+       }
+       if(tim7>=250){
+           bot10.draw();
+       }
+       if(tim7>=300){
+           bot11.draw();
+       }
+       if(tim7>=350){
+           bot12.draw();
+       }
+
+
+            pound2.draw();
+                fill(0,far5);
+            textSize(50);
+            text("Powerup Unlocked",318,249);
+            textSize(30);
+            text("Shut Down",318,299);
+
+            farTim5++;
+
+            if(farTim5>=100){
+                far5-=2;
+            }
+
+
+            if(keys[32]){
+
+            }
+
+        }
+
+        if(level===11){
+
+            laser(-17,129,794,10);
+            pound4.draw();
+        }
+
+        if(level===12){
+            tim8++;
+            for(var i = 0; i < 10; i++){
+            laser(-17,i*120,794,10);
+
+            }
+            if(tim8>=100){
+            pound2.draw();
+            }
+            pound3.draw();
+
+            if(tim8>=50){
+           bot13.draw();
+       }
+       if(tim8>=100){
+           bot14.draw();
+       }
+       if(tim8>=150){
+           bot15.draw();
+       }
+       if(tim8>=200){
+           bot16.draw();
+       }
+       if(tim8>=250){
+           bot17.draw();
+       }
+       if(tim8>=300){
+           bot18.draw();
+       }
+       if(tim8>=350){
+           bot19.draw();
+       }
+       if(tim8>=400){
+           bot20.draw();
+       }
+       if(tim8>=450){
+           bot21.draw();
+       }
+       if(tim8>=500){
+           bot22.draw();
+       }
+       if(tim8>=550){
+           bot23.draw();
+       }
+
+          circle(500,96,2);
+          circle(100,96,2);
+
+          cutter(86,342);
+            cutter(516,342);
+
+          if(lvl12x<=0){
+            lvl12s = 2;
+        }
+
+        if(lvl12x>=570){
+            lvl12s = -2;
+        }
+            circle(lvl12x,223,2);
+
+
+
+            lvl12x += lvl12s;
+
+        }
+
+        if(level===13){
+            page = "end";
+        }
+
+        pButton.draw();
+    }
+
+    if(page==="end"){
+
+         noStroke();
+         for(var i = 0; i < width+5; i += 5){
+            strokeWeight(5);
+            stroke(lerpColor(
+                color(0, 196, 255),
+                color(0, 255, 170),
+                i/height));
+            line(i, 0, i, height);
+        }
+
+                    pushMatrix();
+                    translate(0, -127);
+                    noStroke();
+                    rotate(12);
+                    fill(0, 0, 0,10);
+                    rect(0, 150, width * 1.2, 30);
+                    rect(0, 200, width * 1.2, 100);
+                    rect(0, 230, width * 1.2, 40);
+                    rect(0, 360, width * 1.2, 30);
+                    rect(0, 520, width * 1.2, 80);
+                    rect(0, 540, width, 20);
+                    popMatrix();
+
+                    Player();
+                    pushMatrix();
+                    rotate(sin(frameCount*2)*3);
+        txt("Thanks for\nPlaying!!!",308,100,100);
+        popMatrix();
+
+        fill(0,0,0,tfade);
+textSize(30);
+txt("~A Game By: Chromium Coder~",299,314,30);
+ if(p.y <= 0){
+
+     level= 14;
+
+}
+
+if(level===14){
+   resetPlayer();
+             background(0);
+
+                    pushMatrix();
+                    translate(0, -127);
+                    noStroke();
+                    rotate(12);
+                    fill(255,10);
+                    rect(0, 150, width * 1.2, 30);
+                    rect(0, 200, width * 1.2, 100);
+                    rect(0, 230, width * 1.2, 40);
+                    rect(0, 360, width * 1.2, 30);
+                    rect(0, 520, width * 1.2, 80);
+                    rect(0, 540, width, 20);
+                    popMatrix();
+                    fill(0,0,0,tfade);
+textSize(30);
+txt("You found the Easter Egg!\n Put\" Jelly Beans\" in the \nTIPS AND THANKS!!",299,314,30);
+pushMatrix();
+                    rotate(sin(frameCount*2)*3);
+        txt("🥚",308,100,100);
+        popMatrix();
+
+}
+backButton.draw();
+    }
+
+    if(page==="pause"){
+        textFont(createFont("Quicksand"));
+         for(var i = 0; i < width+5; i += 5){
+            strokeWeight(5);
+            stroke(lerpColor(
+                color(0, 196, 255),
+                color(0, 255, 170),
+                i/height));
+            line(i, 0, i, height);
+        }
+
+                    pushMatrix();
+                    translate(0, -127);
+                    noStroke();
+                    rotate(12);
+                    fill(0, 0, 0,10);
+                    rect(0, 150, width * 1.2, 30);
+                    rect(0, 200, width * 1.2, 100);
+                    rect(0, 230, width * 1.2, 40);
+                    rect(0, 360, width * 1.2, 30);
+                    rect(0, 520, width * 1.2, 80);
+                    rect(0, 540, width, 20);
+                    popMatrix();
+
+
+        pushMatrix();
+        rotate(sin(frameCount*2)*3);
+        txt("~Paused~",308,100,100);
+        txt("Please stand by while this is\npaused. Press the \"back to\ngame\"button to go\nback to the game.\nOr press\"back\" to go to the menu.",327,252,40);
+        popMatrix();
+
+
+                    back2Button.draw();
+                     backButton.draw();
+    }
+
+
+   clicked = false;
+   trans.run();
+
+};
+
+
+mouseClicked = function(){
+   clicked = true;
+};
+
+keyPressed = function(){
+  keys[keyCode] = true;
+};
+
+keyReleased = function(){
+  keys[keyCode] = false;
+};
+}
+};
+var canvas = document.getElementById("mycanvas");
+    var processingInstance = new Processing(canvas, sketchProc);
+    document.getElementById("Rbutton").onclick = function () {
+       window.location.reload();
+    };
+	</script>
+</html>

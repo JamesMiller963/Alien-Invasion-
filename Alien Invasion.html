@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<!--Download this game and open the file to play it-->
+<!--Current version Finished or 4.1.1-->
+<html>
+	<head>
+		<title>Alien Invasion!</title>
+		<link rel="icon" type="image/png" href="https://daks2k3a4ib2z.cloudfront.net/602fe9be424c738336f8fb0b/60325b1b6157516f34a88574_favicon-32x32.png" sizes="32x32" />
+	</head>
+	<style>
+	    body {
+	        background-color: grey;
+	    }
+	    #Rbutton {
+	        width: 75px;
+	        height: 50px;
+	        background-color: aqua;
+	        color: green;
+	        margin-left:575px;
+	    }
+	    #Rbutton:hover {
+	        background-color: lime;
+	    }
+	</style>
+	<body>
+		<p align="center">
+			<!--This draws the Canvas on the webpage -->
+			<canvas id="mycanvas"></canvas>
+		</p>
+		<button id="Rbutton">Reset</button>
+	</body>
+	<script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script>
+	<script>
+ var sketchProc = function(processingInstance) {
+      with (processingInstance) {
+        size(400, 400);
+        frameRate(60);
+var scene = "menu";
+var clicked = false;
+var alienX = 200;
+var alienSpeed = 2;
+var dead = false;
+rectMode(CENTER);
+textAlign(CENTER, CENTER);
+var rocketChances = [];
+var alienChances = [];
+var aliens = [];
+var rockets = [];
+var pointGiverShow = true;
+var pointTakerShow = true;
+var jackpotShow = true;
+var leaders = [
+    "1st. Ξ🅹ΛɟѲ➈ ~ 20767",
+    "2nd. James Miller ~ 6661",
+    "3rd. ",
+    "4th. ",
+    "5th. ",
+];
+var alien = function (x, y, size) {
+    fill(68, 133, 97);
+    strokeWeight(0.01);
+    ellipse(x, y, size, size);
+    fill(0, 0, 0, 175);
+    ellipse(x - 15, y, size/2, size/2);
+    ellipse(x + 15, y, size/2, size/2);
+    ellipse(x, y, size, size/2);
+};
+for (var i = 0; i < 1000; i++) {
+    rocketChances.push(i);
+}
+for (var i = 0; i < 200; i++) {
+    alienChances.push(i);
+}
+mousePressed = function() {
+    clicked=true;
+};
+mouseReleased = function () {
+clicked = false;
+};
+var button = function(x, y, width, height, msg, page) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.msg = msg;
+    this.page = page;
+};
+button.prototype.display = function() {
+    if (mouseX > this.x-this.width/2 && mouseX < this.x+this.width/2 && mouseY > this.y-this.height/2 && mouseY < this.y+this.height/2) {
+        fill(18, 230, 230);
+        cursor("pointer");
+    }  else {
+        fill(255, 0, 94);
+    }
+    rect(this.x, this.y, this.width, this.height);
+    fill(0);
+    textSize(20);
+    text(this.msg, this.x, this.y);
+};
+button.prototype.mouseClicked = function() {
+    if (clicked && mouseX > this.x-this.width/2 && mouseX < this.x+this.width/2 && mouseY > this.y-this.height/2 && mouseY < this.y+this.height/2) {
+        scene = this.page;
+    }
+};
+var menu = function() {
+    scene = "menu";
+    background(0, 255, 30);
+    textSize(50);
+    fill(sin(frameCount*3)*255, cos(frameCount*4)*250, sin(frameCount*5)*255);
+    text("Alien Invasion!", 200, 75);
+    var playButton = new button(200, 200, 130, 20, "Play", "game");
+    playButton.display();
+    playButton.mouseClicked();
+    var howButton = new button(200, 250, 130, 20, "How", "how");
+    howButton.display();
+    howButton.mouseClicked();
+    var lbButton = new button(200, 300, 130, 20, "Leaderboard", "leaderboard");
+    lbButton.display();
+    lbButton.mouseClicked();
+    alien();
+    text("Version: 4.1.1", 100, 350)
+};
+var backButton = new button(65, 10, 130, 30, "Back", "back");
+var how = function() {
+    background(0, 255, 30);
+    fill(255, 0, 0);
+    text("Use the arrow keys to move and dodge\nlasers. Missles will spawn and they are\nbigger. Avoid Point takers and get point\n givers. Get j's to be invincable for 1/2 \n of a second and to become faster. They\n will also eliminate lose of points when\n you collide with a point taker and\n it will double your points when\n you collide with a point giver.", 265, 200);
+    backButton.display();
+    backButton.mouseClicked();
+};
+var leaderboard = function() {
+    background(0, 255, 30);
+    backButton.display();
+    backButton.mouseClicked();
+    text(leaders[0], 200, 100);
+    text(leaders[1], 200, 140);
+    text(leaders[2], 200, 180);
+    text(leaders[3], 200, 220);
+    text(leaders[4], 200, 260);
+};
+var game = function() {
+    scene = "game";
+cursor("default");
+var lasers = [];
+var laserNum = 30;
+var keys = [];
+var goods = [];
+var bads = [];
+var jackpots = [];
+var playerX = 190;
+var playerY = 380;
+var score = 0;
+keyPressed = function () {
+    keys[keyCode] = true;
+};
+keyReleased = function () {
+    keys[keyCode] = false;
+};
+var collide = function(obj1, obj2) {
+    return obj1.x > (obj2.x - (obj2.width/2 + obj1.width/2)) && obj1.x < (obj2.x + (obj2.width/2 + obj1.width/2)) && obj1.y > (obj2.y - (obj2.height/2 + obj1.width/2)) && obj1.y < (obj2.y + (obj2.height/2 + obj1.height/2));
+};
+var circleCollide = function(obj1, obj2) {
+    return dist(obj1.x, obj1.y, obj2.x, obj2.y) < obj1.width/2+obj2.width/2;
+};
+var laser = function(x, y, width, height, speed) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.speed = speed;
+};
+laser.prototype.display = function() {
+    noStroke();
+    //fill(laserColors[floor(random(1, laserColors.length+1))]);
+    fill(0, random(150, 255), 0);
+    rect(this.x, this.y, this.width, this.height, 50);
+};
+laser.prototype.shoot = function() {
+    this.y+=this.speed;
+    if (this.y > (height+this.height+10)) {
+        this.y = -300;
+        this.x = random(width);
+    }
+};
+var rocket = function(x, y) {
+    this.x = x;
+    this.y = y;
+    this.height = 100;
+    this.width = random(25, 65);
+};
+rocket.prototype.display = function() {
+    fill(0, random(150, 255), 0);
+    rect(this.x, this.y, this.width, this.height, 50);
+};
+rocket.prototype.shoot = function() {
+    this.y+=5;
+};
+for (var i = 0; i < laserNum; i++) {
+    lasers.push(new laser(random(width), -300, random(5, 10), random(20, 60), random(1, 5)));
+}
+var pointGiver = function(x, y, size, speed) {
+    this.x = x;
+    this.y = y;
+    this.width = size;
+    this.height = size;
+    this.speed = speed;
+};
+textSize(20);
+pointGiver.prototype.display = function() {
+    if (pointGiverShow) {
+    fill(0, 255, 0);
+    ellipse(this.x, this.y, this.width, this.height);
+    fill(0);
+    text("+", this.x + 2, this.y - 2);
+    }
+};
+pointGiver.prototype.fall = function() {
+    this.y+=this.speed;
+    if (this.y > 500) {
+        this.x=random(width);
+        this.speed=random(1, 5);
+        this.y=-300;
+        this.width = random(25, 40);
+        this.height = this.width;
+        pointGiverShow = true;
+    }
+};
+for (var i = 0; i < 1; i++) {
+    goods.push(new pointGiver(random(width), -300, random(25, 40), random(1, 5)));
+}
+var pointTaker = function(x, y, size, speed) {
+    this.x = x;
+    this.y = y;
+    this.width = size;
+    this.height = size;
+    this.speed = speed;
+};
+pointTaker.prototype.display = function() {
+    if (pointTakerShow) {
+    fill(255, 0, 0);
+    ellipse(this.x, this.y, this.width, this.height);
+    fill(0);
+    text("-", this.x + 2, this.y - 2);
+    }
+};
+pointTaker.prototype.fall = function() {
+    this.y+=this.speed;
+    if (this.y > 500) {
+        this.x=random(width);
+        this.speed=random(1, 5);
+        this.y=-300;
+        this.width = random(25, 40);
+        this.height = this.width;
+        pointGiverShow = true;
+    }
+};
+for (var i = 0; i < 1; i++) {
+    bads.push(new pointTaker(random(width), -300, random(25, 40), random(1, 5)));
+}
+var jackpot = function(x, y, size, speed) {
+    this.x = x;
+    this.y = y;
+    this.width = size;
+    this.height = size;
+    this.speed = speed;
+};
+jackpot.prototype.display = function() {
+    if (jackpotShow) {
+    fill(random(175, 255), random(175, 255), random(50, 200));
+    ellipse(this.x, this.y, this.width, this.height);
+    fill(0);
+    text("J", this.x + 2, this.y - 2);
+    }
+};
+jackpot.prototype.fall = function() {
+    this.y+=this.speed;
+    if (this.y > 500) {
+        this.x=random(width);
+        this.speed=random(1, 5);
+        this.y=-300;
+        this.width = random(25, 40);
+        this.height = this.width;
+        jackpotShow = true;
+    }
+};
+for (var i = 0; i < 1; i++) {
+    jackpots.push(new jackpot(random(width), -300, random(25, 40), random(1, 5)));
+}
+var dude = function (x, y, width, height, speed) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.dead = false;
+    this.speed = speed;
+    if (playerX >= 380) {
+        playerX = 380;
+    }else if (playerX <= 0) {
+        playerX = 0;
+    }
+};
+dude.prototype.display = function () {
+    fill(0, 255, 140);
+    rect(this.x, this.y, this.width, this.height);
+    fill(0);
+    ellipse(this.x - 5, this.y - 4, 5, 5);
+    ellipse(this.x + 5, this.y - 4, 5, 5);
+};
+dude.prototype.move = function () {
+    if (keys[RIGHT] && this.x <= 385) {
+        this.x += this.speed;
+    }
+    if (keys[LEFT] && this.x >= 15) {
+        this.x -= this.speed;
+    }
+};
+dude.prototype.laserCollide = function(laser) {
+    if (collide(this, laser) && jackpotShow) {
+        if (!this.dead) {
+        //playSound(getSound("retro/boom2"));
+        //playSound(getSound("retro/laser2"));
+        }
+        this.dead = true;
+    }
+};
+dude.prototype.goodCollide = function(good) {
+    if (circleCollide(this, good) && !this.dead && pointGiverShow) {
+        if (!jackpotShow) {
+            score+=2000;
+        }else {
+        score+=1000;
+        }
+        pointGiverShow = false;
+        goods.splice(new pointGiver(random(width), -300, random(25, 40), random(1, 5)));
+        goods.push(new pointGiver(random(width), -300, random(25, 40), random(1, 5)));
+    }
+};
+dude.prototype.badCollide = function(bad) {
+    if (circleCollide(this, bad) && !this.dead && pointTakerShow) {
+        if (jackpotShow) {
+        score-=1000;
+        }
+        pointTakerShow = false;
+        bads.splice(new pointTaker(random(width), -300, random(25, 40), random(1, 5)));
+        bads.push(new pointTaker(random(width), -300, random(25, 40), random(1, 5)));
+    }
+};
+dude.prototype.jackpotCollide = function(jackpot) {
+    if (circleCollide(this, jackpot) && !this.dead && jackpotShow) {
+        score+=5000;
+        jackpotShow = false;
+        this.speed = 10;
+    }
+    if (jackpotShow) {
+        this.speed = 5;
+    }
+};
+var w = new dude(200, 380, 20, 20, 5);
+draw = function() {
+    background(29, 71, 70);
+    var rocketChanceNum = round(random(rocketChances.length));
+    var alienChanceNum = round(random(alienChances.length));
+    if (!w.dead) {
+        score++;
+    }
+    fill(0, 255, 149);
+    text("Score: "+score, 200, 50);
+    w.display();
+    w.move();
+    for (var i = 0; i < goods.length; i++) {
+        goods[i].display();
+        goods[i].fall();
+        w.goodCollide(goods[i]);
+    }
+    for (var i = 0; i < bads.length; i++) {
+        bads[i].display();
+        bads[i].fall();
+        w.badCollide(bads[i]);
+    }
+    for (var i = 0; i < jackpots.length; i++) {
+        jackpots[i].display();
+        jackpots[i].fall();
+        w.jackpotCollide(jackpots[i]);
+    }
+    if (rocketChanceNum === 1) {
+        rockets.push(new rocket(random(width), -500));
+    }
+    for (var i = 0; i < rockets.length; i++) {
+        rockets[i].display();
+        rockets[i].shoot();
+        w.laserCollide(rockets[i]);
+    }
+    for (var i = 0; i < lasers.length; i++) {
+        lasers[i].display();
+        lasers[i].shoot();
+        w.laserCollide(lasers[i]);
+    }
+    if (w.dead && scene === "game") {
+        background(255, 0, 0);
+        dead = true;
+        fill(0);
+        textSize(50);
+        text("YOU DIED!\nwith a score of...\n\n"+score, 200, 200);
+        textSize(13);
+        text("Press the reload button to play again", 200, 360);
+    }
+};
+};
+draw = function() {
+    if (!dead) {
+    cursor("default");
+    }
+    background(255);
+    if (scene === "menu") {
+        menu();
+    }
+    if (scene === "game") {
+        game();
+    }
+    if (scene === "how"){
+        how();
+    }
+    if (scene === "back") {
+        menu();
+    }
+    if (scene === "leaderboard") {
+        leaderboard();
+    }
+};
+}};
+var canvas = document.getElementById("mycanvas");
+    var processingInstance = new Processing(canvas, sketchProc);
+    document.getElementById("Rbutton").onclick = function () {
+       window.location.reload();
+    };
+
+
+
+	</script>
+</html>
